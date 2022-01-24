@@ -14,9 +14,9 @@ class Message {
 }
 //route = string (the address)
 //Callback function = tells the route what to do using 2 parameters (the request, and response)
-app.get('/message', (request, response) => {
-    console.log("heres a request!" + request.method);
-    response.send(messages);
+app.get('/message', (req, res) => {
+    console.log("heres a request!" + req.method);
+    res.send(messages);
 }); //this method modifies app singleton 
 //QQQ request.method???
 // request means client says hey gimme this pls
@@ -25,10 +25,14 @@ function createMessage(req, res, next) {
     const messageText = req.query.text;
     const authorName = req.query.author;
 
+    if(!messageText || !authorName){
+        next('Nice try nerd')
+    } else {
     const message = new Message(messageText, authorName);
     req.message = message;
 
     next();
+    }
 }
 function saveMessage(req, res, next){
 
@@ -37,15 +41,15 @@ function saveMessage(req, res, next){
         next();
 }
 
- app.post('/message', createMessage, saveMessage, (request, response, next) => {
-     response.send(messages);
+ app.post('/message', createMessage, saveMessage, (req, res, next) => {
+     res.send(messages);
  });
- app.use(function (err, request, response, next) {
+ app.use(function (err, req, res, next) {
      console.log(err);
-    response.send('error handler hit!')
+    res.send('error handler hit!')
  });
- app.use(function (request,response){
-     response.status(404).send('Nothing found')
+ app.use(function (req, res){
+     res.status(404).send('Nothing found')
  })
 
 module.exports = {
